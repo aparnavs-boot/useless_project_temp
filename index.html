@@ -1,1 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Don't Break the Timeline - Sci-Fi Temporal Adventure</title>
+  <meta name="description"
+    content="Fix historical anomalies, prevent temporal collapse, or push Ancient Greece into cyber chaos in this sci-fi 2D adventure!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Ambient Scanlines & Glitch Overlay -->
+  <div class="crt-overlay"></div>
+  <div class="screen-vignette"></div>
+  <div id="glitchFlash" class="glitch-flash"></div>
+
+  <!-- Main Game Container -->
+  <div id="gameContainer">
+    <!-- 2D Canvas Viewport -->
+    <canvas id="gameCanvas" width="960" height="600"></canvas>
+
+    <!-- Top Holographic HUD Bar -->
+    <header id="hologramHud" class="hologram-hud">
+      <div class="hud-brand">
+        <div class="chrono-logo">
+          <div class="logo-orb"></div>
+          <span class="logo-text">T.E.D. <span class="logo-sub">v4.2 ChronoGuard</span></span>
+        </div>
+        <div class="current-era-badge" id="currentEraBadge">
+          <span class="era-pulse"></span>
+          <span id="eraLabel">420 BC // ATHENS AGORA</span>
+        </div>
+      </div>
+
+      <!-- Quick Timeline Switcher Tabs -->
+      <div class="quick-era-switcher" title="Instant Timeline Branch Switcher">
+        <span class="switcher-label">TIMELINE:</span>
+        <button class="era-tab active" id="tabEra1" data-era="1">1. CANON</button>
+        <button class="era-tab" id="tabEra2" data-era="2">2. GLITCH</button>
+        <button class="era-tab" id="tabEra3" data-era="3">3. CYBER</button>
+      </div>
+
+      <!-- Timeline Stability Gauge -->
+      <div class="stability-container">
+        <div class="stability-header">
+          <span class="stability-title">TIMELINE STABILITY</span>
+          <span class="stability-val" id="stabilityText">100%</span>
+        </div>
+        <div class="stability-bar-track">
+          <div class="stability-bar-fill" id="stabilityBar"></div>
+          <div class="stability-bar-ticks"></div>
+          <div class="critical-indicator" id="criticalIndicator">PARADOX SPIKE</div>
+        </div>
+        <div class="timeline-status-state" id="timelineStateLabel">STATE: BASELINE CANON</div>
+      </div>
+
+      <!-- Action / Utility Buttons -->
+      <div class="hud-controls">
+        <button id="audioToggleBtn" class="hud-btn" title="Toggle Sound (M)">
+          <span id="audioIcon">🔊</span> SOUND: <span id="audioStatus">ON</span>
+        </button>
+        <button id="helpBtn" class="hud-btn" title="Mission Handbook (H)">
+          <span>📋</span> MANUAL
+        </button>
+        <button id="timeTravelBtn" class="hud-btn hud-btn-jump" title="Chrono-Shift Vortex Jump (SPACE)">
+          <span class="jump-pulse"></span>
+          <span class="btn-icon">⚡</span> CHRONO-SHIFT
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Objective Panel -->
+    <div id="objectivePanel" class="holo-panel objective-panel">
+      <div class="panel-header">
+        <span class="holo-tag">[ ACTIVE ANOMALIES ]</span>
+        <span class="anomaly-counter" id="anomalyCounter">3 LEAKS ACTIVE</span>
+      </div>
+      <div class="mission-desc" id="missionDesc">
+        Retrieve 24th-century contraband before the philosophers reverse-engineer them!
+      </div>
+      <ul class="anomaly-list" id="anomalyList">
+        <!-- Injected via JavaScript -->
+      </ul>
+    </div>
+
+    <!-- Interactive Prompt (e.g. Press E to Talk / Pick Up) -->
+    <div id="interactPrompt" class="interact-prompt hidden">
+      <div class="prompt-key">E</div>
+      <div class="prompt-text" id="promptText">Inspect Object</div>
+    </div>
+
+    <!-- Dialogue Modal with Hologram Avatar & Choices -->
+    <div id="dialogueModal" class="holo-modal dialogue-modal hidden">
+      <div class="dialogue-scanline"></div>
+      <div class="dialogue-content">
+        <!-- Portrait Box -->
+        <div class="portrait-container">
+          <div class="portrait-avatar" id="npcPortrait">👴</div>
+          <div class="portrait-name" id="npcName">Socrates</div>
+          <div class="portrait-title" id="npcTitle">Gadfly of Athens</div>
+        </div>
+
+        <!-- Speech & Choices -->
+        <div class="speech-container">
+          <div class="speech-bubble">
+            <p id="dialogueText" class="typewriter-text"></p>
+          </div>
+          <div class="dialogue-choices" id="dialogueChoices">
+            <!-- Dynamic Choice Buttons -->
+          </div>
+        </div>
+      </div>
+      <button class="dialogue-close-btn" id="closeDialogueBtn" title="Close Dialogue (ESC)">✕</button>
+    </div>
+
+    <!-- Inventory Dock / Hotbar -->
+    <footer id="inventoryDock" class="inventory-dock">
+      <div class="inventory-label">
+        <span>INVENTORY</span>
+        <span class="inventory-tip">(Keys 1-6 | Q to Drop | E to Offer in Dialogue)</span>
+      </div>
+      <div class="inventory-slots" id="inventorySlots">
+        <!-- Dynamic Slots -->
+      </div>
+    </footer>
+
+    <!-- Time Travel / Chrono-Shift Fullscreen Overlay -->
+    <div id="timeTravelModal" class="time-travel-modal hidden">
+      <div class="vortex-background">
+        <div class="vortex-ring ring-1"></div>
+        <div class="vortex-ring ring-2"></div>
+        <div class="vortex-ring ring-3"></div>
+        <div class="vortex-core"></div>
+      </div>
+      <div class="time-travel-ui">
+        <div class="holo-card time-slip-card">
+          <div class="card-header">
+            <span class="card-tag">TEMPORAL EQUILIBRIUM DEVICE</span>
+            <h2>CHRONO-SHIFT INTERFACE</h2>
+            <p class="card-hint">Click any timeline branch below to shift reality!</p>
+          </div>
+
+          <div class="paradox-gauge-display">
+            <div class="timeline-visualizer" id="timelineGraph">
+              <div class="graph-line"></div>
+
+              <div class="branch-node node-canon active" id="nodeCanon" role="button" tabindex="0"
+                title="Click to jump to 420 BC Classical Canon">
+                <span class="node-dot"></span>
+                <span class="node-title">420 BC Canon</span>
+                <span class="node-sub">Stable (100%)</span>
+              </div>
+
+              <div class="branch-node node-corrupt" id="nodeCorrupt" role="button" tabindex="0"
+                title="Click to jump to Anachronistic Distortion">
+                <span class="node-dot"></span>
+                <span class="node-title">Anachronism</span>
+                <span class="node-sub">Glitching (55%)</span>
+              </div>
+
+              <div class="branch-node node-ridiculous" id="nodeRidiculous" role="button" tabindex="0"
+                title="Click to jump to Cyber-Olympus Synthwave Rave">
+                <span class="node-dot"></span>
+                <span class="node-title">Cyber-Olympus</span>
+                <span class="node-sub">Hyper-Chaos (20%)</span>
+              </div>
+            </div>
+
+            <div class="timeline-meta">
+              <div class="meta-item">
+                <span class="meta-lbl">CURRENT PARADOX INDEX:</span>
+                <span class="meta-val" id="paradoxIndexVal">0.00 PARADOXONS</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-lbl">HISTORICAL STABILITY STATUS:</span>
+                <span class="meta-val" id="deviationVal">SAFE / BASELINE CANON</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-travel-actions">
+            <button id="stabilizeTimelineBtn" class="chrono-btn chrono-btn-stabilize">
+              <span>🌀</span> REWIND LOCAL PARADOX
+            </button>
+            <button id="warpHomeBtn" class="chrono-btn chrono-btn-jump">
+              <span>⚡</span> WARP HOME & REPORT
+            </button>
+            <button id="exitTimeTravelBtn" class="chrono-btn chrono-btn-resume">
+              ▶ RESUME MISSION
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Handbook / Instructions Modal -->
+    <div id="helpModal" class="holo-modal help-modal hidden">
+      <div class="help-card">
+        <div class="help-header">
+          <h2>CHRONOGUARD FIELD MANUAL</h2>
+          <button id="closeHelpBtn" class="close-help-btn">✕</button>
+        </div>
+        <div class="help-body">
+          <div class="help-section">
+            <h3>🎮 MISSION DIRECTIVE</h3>
+            <p>You have materialized in Athens, 420 BC. Three 24th-century objects accidentally slipped through a rift:
+              the <strong>Quantum Smartphone</strong>, the <strong>Neon CyberBull Energy Drink</strong>, and the
+              <strong>Plasma Laser Cutter</strong>.</p>
+            <p>You can collect the items, talk to philosophers, shift timeline states using
+              <strong>CHRONO-SHIFT</strong> or the top timeline switcher, and warp home to submit your mission report.
+            </p>
+          </div>
+
+          <div class="help-section">
+            <h3>🕹️ CONTROLS</h3>
+            <div class="controls-grid">
+              <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or Arrow Keys</div>
+              <div>Move Agent Chrono</div>
+              <div><kbd>E</kbd> or Click Nearby</div>
+              <div>Interact with NPCs / Pick up Objects</div>
+              <div><kbd>SPACE</kbd></div>
+              <div>Trigger Chrono-Shift Jump Device</div>
+              <div><kbd>1</kbd> - <kbd>6</kbd></div>
+              <div>Select Inventory Item</div>
+              <div><kbd>Q</kbd></div>
+              <div>Drop Selected Item</div>
+              <div><kbd>M</kbd></div>
+              <div>Mute / Unmute Procedural Sound</div>
+              <div><kbd>H</kbd></div>
+              <div>Open / Close Field Manual</div>
+            </div>
+          </div>
+
+          <div class="help-section">
+            <h3>🏆 MULTIPLE OUTCOMES</h3>
+            <ul>
+              <li><strong>Rank S - Master Chronoguard:</strong> Recover all 3 anomalies, restore 100% stability, and
+                preserve authentic history.</li>
+              <li><strong>Rank A - The Sage's Calculator:</strong> Recover most tech, but leave Socrates with one
+                curious curiosity.</li>
+              <li><strong>Rank B - Cyber-Olympus:</strong> Equip ancient Greeks with tech or switch to Cyber-Olympus to
+                break history with style!</li>
+              <li><strong>Rank F - Chrono-Collapse:</strong> Total paradox meltdown at 0% stability!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Mission Outcome / Ending Modal -->
+    <div id="endingModal" class="ending-modal hidden">
+      <div class="ending-card holo-panel">
+        <div class="ending-badge" id="endingBadge">RANK S</div>
+        <h1 class="ending-title" id="endingTitle">PRISTINE CANON PRESERVED</h1>
+        <div class="ending-tagline" id="endingTagline">History marches forward along its rightful groove.</div>
+
+        <div class="ending-report" id="endingReport">
+          <!-- Dynamically populated report stats -->
+        </div>
+
+        <div class="ending-actions">
+          <button id="restartBtn" class="chrono-btn chrono-btn-restart">
+            🔄 REWIND TO MISSION START
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /gameContainer -->
+
+  <!-- Game Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/items.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/dialogue.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
